@@ -1,11 +1,11 @@
 ﻿namespace Assistant.Data.Interfaces
 {
-    internal interface ITaskRepository
+    public interface ITaskRepository
     {
         void Add(Task item);
         IEnumerable<Task> GetAll();
-        Task Find(string key);
-        Task Remove(string key);
+        Task Find(int id);
+        Task Remove(int id);
         void Update(Task item);
     }
 }

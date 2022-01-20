@@ -2,14 +2,14 @@
 
 namespace Assistant.Data.Repositories
 {
-    internal class TaskRepository : ITaskRepository
+    public class TaskRepository : ITaskRepository
     {
         public void Add(Task item)
         {
             throw new NotImplementedException();
         }
 
-        public Task Find(string key)
+        public Task Find(int id)
         {
             throw new NotImplementedException();
         }
@@ -19,7 +19,7 @@ namespace Assistant.Data.Repositories
             throw new NotImplementedException();
         }
 
-        public Task Remove(string key)
+        public Task Remove(int id)
         {
             throw new NotImplementedException();
         }
