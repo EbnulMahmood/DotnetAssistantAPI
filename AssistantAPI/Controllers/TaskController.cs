@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AssistantAPI.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Task = AssistantAPI.Models.Task;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssistantAPI.Controllers
@@ -7,16 +9,19 @@ namespace AssistantAPI.Controllers
     [ApiController]
     public class TaskController : ControllerBase
     {
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly ITaskRepository _taskRepository;
+        public TaskController(ITaskRepository taskRepository)
         {
-            return new string[] { "Task_1", "Task_2", "Task_3" };
+            _taskRepository = taskRepository;
         }
 
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<Task>))]
+        public IActionResult GetTasks()
         {
-            return $"Task: {id}";
+            var tasks = _taskRepository.GetAll();
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+            return Ok(tasks);
         }
     }
 }
