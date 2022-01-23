@@ -1,4 +1,6 @@
 ﻿using Assistant.Data.Interfaces;
+using Assistant.Data.Models;
+using Task = Assistant.Data.Models.Task;
 
 namespace Assistant.Data.Repositories
 {
@@ -14,7 +16,7 @@ namespace Assistant.Data.Repositories
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Task> GetAll()
+        public ICollection<Task> GetAll()
         {
             throw new NotImplementedException();
         }
