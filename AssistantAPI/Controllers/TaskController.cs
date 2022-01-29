@@ -1,6 +1,7 @@
 ﻿using AssistantAPI.Interfaces;
 using Microsoft.AspNetCore.Http;
-using Task = AssistantAPI.Models.Task;
+using AssignTask = AssistantAPI.Models.Task;
+using Person = AssistantAPI.Models.Person;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssistantAPI.Controllers
@@ -16,7 +17,7 @@ namespace AssistantAPI.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(IEnumerable<Task>))]
+        [ProducesResponseType(200, Type = typeof(IEnumerable<AssignTask>))]
         public IActionResult GetTasks()
         {
             var tasks = _taskRepository.GetAll();

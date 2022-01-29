@@ -2,12 +2,14 @@ using AssistantAPI.Interfaces;
 using AssistantAPI.Repositories;
 using AssistantAPI.Data;
 using Microsoft.EntityFrameworkCore;
+using AssistantAPI.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
