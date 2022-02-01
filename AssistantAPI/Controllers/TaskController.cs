@@ -37,6 +37,40 @@ namespace AssistantAPI.Controllers
             return Ok("Successfully created!");
         }
 
+        [HttpPut("{taskId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateTask(int taskId, [FromBody] AssignTask task)
+        {
+            if (task == null) { return BadRequest(ModelState); }
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+            if (!_taskRepository.Update(task))
+            {
+                ModelState.AddModelError("", "Something went wrong updating task!");
+                return StatusCode(500, ModelState);
+            }
+            return Ok("Successfully updated!");
+        }
+
+        [HttpGet("{assignedTo}")]
+        public IActionResult GetAssignedTasks(string assignedTo)
+        {
+            try
+            {
+                var task =  _taskRepository.GetAssignedTasks(assignedTo);
+                if (task == null)
+                    return NotFound();
+
+                return Ok(task);
+            }
+            catch (Exception ex)
+            {
+                //log error
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<AssignTask>))]
         public IActionResult GetTasks()
