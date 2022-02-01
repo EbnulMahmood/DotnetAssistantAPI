@@ -1,7 +1,5 @@
 ﻿using AssistantAPI.Interfaces;
-using Microsoft.AspNetCore.Http;
 using AssignTask = AssistantAPI.Models.Task;
-using Person = AssistantAPI.Models.Person;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssistantAPI.Controllers
@@ -14,6 +12,29 @@ namespace AssistantAPI.Controllers
         public TaskController(ITaskRepository taskRepository)
         {
             _taskRepository = taskRepository;
+        }
+
+        [HttpPost]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public IActionResult CreateTask([FromBody] AssignTask assignTask)
+        {
+            if (assignTask == null) { return BadRequest(ModelState); }
+            var task = _taskRepository.GetAll()
+                .Where(t => t.Name.Trim().ToLower().Equals(assignTask.Name.Trim().ToLower()))
+                .FirstOrDefault();
+            if (task != null)
+            {
+                ModelState.AddModelError("", "Task already exists!");
+                return StatusCode(422, ModelState);
+            }
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+            if(!_taskRepository.Add(assignTask))
+            {
+                ModelState.AddModelError("", "Something went wrong while saving!");
+                return StatusCode(500, ModelState);
+            }
+            return Ok("Successfully created!");
         }
 
         [HttpGet]
