@@ -129,5 +129,21 @@ namespace AssistantAPI.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpDelete("{taskId}")]
+        public IActionResult DeleteTask(int taskId)
+        {
+            try
+            {
+                if (!_taskRepository.Remove(taskId))
+                    ModelState.AddModelError("", "Something went wrong deleting task!");
+
+                return Ok("Successfully deleted!");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
