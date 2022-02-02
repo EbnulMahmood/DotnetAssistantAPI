@@ -53,20 +53,53 @@ namespace AssistantAPI.Controllers
             return Ok("Successfully updated!");
         }
 
-        [HttpGet("{assignedTo}")]
+        [HttpGet("assigned/{assignedTo}")]
         public IActionResult GetAssignedTasks(string assignedTo)
         {
             try
             {
-                var task =  _taskRepository.GetAssignedTasks(assignedTo);
-                if (task == null)
+                var tasks =  _taskRepository.GetAssignedTasks(assignedTo);
+                if (tasks == null)
                     return NotFound();
 
-                return Ok(task);
+                return Ok(tasks);
             }
             catch (Exception ex)
             {
-                //log error
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("requested/{requestedBy}")]
+        public IActionResult GetRequestedTasks(string requestedBy)
+        {
+            try
+            {
+                var tasks = _taskRepository.GetRequestedTasks(requestedBy);
+                if (tasks == null)
+                    return NotFound();
+
+                return Ok(tasks);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("completed/{completedBy}")]
+        public IActionResult GetCompletedTasks(string completedBy)
+        {
+            try
+            {
+                var tasks = _taskRepository.GetCompletedTasks(completedBy);
+                if (tasks == null)
+                    return NotFound();
+
+                return Ok(tasks);
+            }
+            catch (Exception ex)
+            {
                 return StatusCode(500, ex.Message);
             }
         }
@@ -78,6 +111,23 @@ namespace AssistantAPI.Controllers
             var tasks = _taskRepository.GetAll();
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
             return Ok(tasks);
+        }
+
+        [HttpGet("{taskName}")]
+        public IActionResult GetTaskDetails(string taskName)
+        {
+            try
+            {
+                var tasks = _taskRepository.GetDetails(taskName);
+                if (tasks == null)
+                    return NotFound();
+
+                return Ok(tasks);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }
