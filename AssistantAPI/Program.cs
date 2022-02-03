@@ -3,6 +3,7 @@ using AssistantAPI.Repositories;
 using AssistantAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using AssistantAPI.Context;
+using AssistantAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRequestLogMiddleware();
 
 app.UseHttpsRedirection();
 
