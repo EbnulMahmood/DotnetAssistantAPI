@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AssistantAPI.Interfaces;
+using RequestLog = AssistantAPI.Models.RequestLog;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -15,16 +17,23 @@ namespace AssistantAPI.Middlewares
             _next = next;
         }
 
-        public Task InvokeAsync(HttpContext httpContext)
+        public Task InvokeAsync(HttpContext httpContext, ILogRepository logRepository)
         {
             var watch = new Stopwatch();
             watch.Start();
-            var requestArrives = watch.ElapsedMilliseconds.ToString();
+            string? requestArrives = watch.ElapsedMilliseconds.ToString();
+            string? requestLeaves = null;
             httpContext.Response.OnStarting(() => {
                 watch.Stop();
-                var requestLeaves = watch.ElapsedMilliseconds.ToString();
+                requestLeaves = watch.ElapsedMilliseconds.ToString();
                 return Task.CompletedTask;
             });
+            RequestLog requestLog = new()
+            {
+                RequestArrivalTime = requestArrives,
+                RequestLeaveTime = requestLeaves,
+            };
+            logRepository.AddRequestLog(requestLog);
             return _next(httpContext);
         }
     }

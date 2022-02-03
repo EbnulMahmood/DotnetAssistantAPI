@@ -1,6 +1,7 @@
 ﻿using AssistantAPI.Interfaces;
 using AssignTask = AssistantAPI.Models.Task;
 using Person = AssistantAPI.Models.Person;
+using ExceptionLog = AssistantAPI.Models.ExceptionLog;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssistantAPI.Controllers
@@ -10,9 +11,20 @@ namespace AssistantAPI.Controllers
     public class TaskController : ControllerBase
     {
         private readonly ITaskRepository _taskRepository;
-        public TaskController(ITaskRepository taskRepository)
+        private readonly ILogRepository _logRepository;
+        public TaskController(ITaskRepository taskRepository, ILogRepository logRepository)
         {
             _taskRepository = taskRepository;
+            _logRepository = logRepository;
+        }
+
+        private void AddExceptionLog(Exception ex)
+        {
+            ExceptionLog exceptionLog = new()
+            {
+                Message = ex.Message,
+            };
+            _logRepository.AddExceptionLog(exceptionLog);
         }
 
         [HttpPost]
@@ -20,22 +32,30 @@ namespace AssistantAPI.Controllers
         [ProducesResponseType(400)]
         public IActionResult CreateTask([FromBody] AssignTask assignTask)
         {
-            if (assignTask == null) { return BadRequest(ModelState); }
-            var task = _taskRepository.GetAll()
-                .Where(t => t.Name.Trim().ToLower().Equals(assignTask.Name.Trim().ToLower()))
-                .FirstOrDefault();
-            if (task != null)
+            try
             {
-                ModelState.AddModelError("", "Task already exists!");
-                return StatusCode(422, ModelState);
+                if (assignTask == null) { return BadRequest(ModelState); }
+                var task = _taskRepository.GetAll()
+                    .Where(t => t.Name.Trim().ToLower().Equals(assignTask.Name.Trim().ToLower()))
+                    .FirstOrDefault();
+                if (task != null)
+                {
+                    ModelState.AddModelError("", "Task already exists!");
+                    return StatusCode(422, ModelState);
+                }
+                if (!ModelState.IsValid) { return BadRequest(ModelState); }
+                if (!_taskRepository.Add(assignTask))
+                {
+                    ModelState.AddModelError("", "Something went wrong while saving!");
+                    return StatusCode(500, ModelState);
+                }
+                return Ok("Successfully created!");
             }
-            if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            if(!_taskRepository.Add(assignTask))
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", "Something went wrong while saving!");
-                return StatusCode(500, ModelState);
+                AddExceptionLog(ex);
+                return StatusCode(500, ex.Message);
             }
-            return Ok("Successfully created!");
         }
 
         [HttpPut("{taskId}")]
@@ -44,15 +64,23 @@ namespace AssistantAPI.Controllers
         [ProducesResponseType(404)]
         public IActionResult UpdateTask(int taskId, [FromBody] AssignTask task)
         {
-            if (task == null) { return BadRequest(ModelState); }
-            if (taskId != task.Id) { return NotFound(); }
-            if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            if (!_taskRepository.Update(task))
+            try
             {
-                ModelState.AddModelError("", "Something went wrong updating task!");
-                return StatusCode(500, ModelState);
+                if (task == null) { return BadRequest(ModelState); }
+                if (taskId != task.Id) { return NotFound(); }
+                if (!ModelState.IsValid) { return BadRequest(ModelState); }
+                if (!_taskRepository.Update(task))
+                {
+                    ModelState.AddModelError("", "Something went wrong updating task!");
+                    return StatusCode(500, ModelState);
+                }
+                return Ok("Successfully updated!");
             }
-            return Ok("Successfully updated!");
+            catch (Exception ex)
+            {
+                AddExceptionLog(ex);
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPut("person/{personId}")]
@@ -61,15 +89,23 @@ namespace AssistantAPI.Controllers
         [ProducesResponseType(404)]
         public IActionResult UpdatePerson(int personId, [FromBody] Person person)
         {
-            if (person == null) { return BadRequest(ModelState); }
-            if (personId != person.Id) { return NotFound(); }
-            if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            if (!_taskRepository.UpdatePerson(person))
+            try
             {
-                ModelState.AddModelError("", "Something went wrong updating person!");
-                return StatusCode(500, ModelState);
+                if (person == null) { return BadRequest(ModelState); }
+                if (personId != person.Id) { return NotFound(); }
+                if (!ModelState.IsValid) { return BadRequest(ModelState); }
+                if (!_taskRepository.UpdatePerson(person))
+                {
+                    ModelState.AddModelError("", "Something went wrong updating person!");
+                    return StatusCode(500, ModelState);
+                }
+                return Ok("Successfully updated!");
             }
-            return Ok("Successfully updated!");
+            catch (Exception ex)
+            {
+                AddExceptionLog(ex);
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("assigned/{assignedTo}")]
@@ -85,6 +121,7 @@ namespace AssistantAPI.Controllers
             }
             catch (Exception ex)
             {
+                AddExceptionLog(ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -102,6 +139,7 @@ namespace AssistantAPI.Controllers
             }
             catch (Exception ex)
             {
+                AddExceptionLog(ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -119,6 +157,7 @@ namespace AssistantAPI.Controllers
             }
             catch (Exception ex)
             {
+                AddExceptionLog(ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -127,9 +166,17 @@ namespace AssistantAPI.Controllers
         [ProducesResponseType(200, Type = typeof(IEnumerable<AssignTask>))]
         public IActionResult GetTasks()
         {
-            var tasks = _taskRepository.GetAll();
-            if (!ModelState.IsValid) { return BadRequest(ModelState); }
-            return Ok(tasks);
+            try
+            {
+                var tasks = _taskRepository.GetAll();
+                if (!ModelState.IsValid) { return BadRequest(ModelState); }
+                return Ok(tasks);
+            }
+            catch (Exception ex)
+            {
+                AddExceptionLog(ex);
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("{taskName}")]
@@ -145,6 +192,7 @@ namespace AssistantAPI.Controllers
             }
             catch (Exception ex)
             {
+                AddExceptionLog(ex);
                 return StatusCode(500, ex.Message);
             }
         }
@@ -161,6 +209,7 @@ namespace AssistantAPI.Controllers
             }
             catch (Exception ex)
             {
+                AddExceptionLog(ex);
                 return StatusCode(500, ex.Message);
             }
         }
