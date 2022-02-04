@@ -12,5 +12,7 @@ namespace AssistantAPI.Data
         }
         public DbSet<Person>? Persons { get; set; }
         public DbSet<Task>? Tasks { get; set; }
+        public DbSet<RequestLog> RequestLogs { get; set; }
+        public DbSet<ExceptionLog> ExceptionLogs { get; set; }
     }
 }

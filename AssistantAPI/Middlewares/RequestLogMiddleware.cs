@@ -1,7 +1,5 @@
 ﻿using AssistantAPI.Interfaces;
 using RequestLog = AssistantAPI.Models.RequestLog;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -11,6 +9,7 @@ namespace AssistantAPI.Middlewares
     public class RequestLogMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogRepository _logRepository;
 
         public RequestLogMiddleware(RequestDelegate next)
         {
@@ -26,14 +25,14 @@ namespace AssistantAPI.Middlewares
             httpContext.Response.OnStarting(() => {
                 watch.Stop();
                 requestLeaves = watch.ElapsedMilliseconds.ToString();
+                RequestLog requestLog = new()
+                {
+                    RequestArrivalTime = requestArrives,
+                    RequestLeaveTime = requestLeaves,
+                };
+                logRepository.AddRequestLog(requestLog);
                 return Task.CompletedTask;
             });
-            RequestLog requestLog = new()
-            {
-                RequestArrivalTime = requestArrives,
-                RequestLeaveTime = requestLeaves,
-            };
-            logRepository.AddRequestLog(requestLog);
             return _next(httpContext);
         }
     }
